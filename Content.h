@@ -1,6 +1,6 @@
 #pragma once
 
-const char *main_form = "<!DOCTYPE html>\n"
+const char *main_form_preamble = "<!DOCTYPE html>\n"
     "<html>\n"
     "<title>WaterGate</title>\n"
     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
@@ -16,10 +16,17 @@ const char *main_form = "<!DOCTYPE html>\n"
             "<div class=\"w3-cell\">\n"
   	            "<div class=\"w3-center\">\n"
   	                "<div class=\"bar\">\n"
-    	                "<a href=\"/0\" class=\"w3-button w3-red w3-round-large\">Led 0</a>\n"
-    	                "<a href=\"/1\" class=\"w3-button w3-red w3-round-large\">Led 1</a>\n"
-    	                "<a href=\"/2\" class=\"w3-button w3-red w3-round-large\">Led 2</a>\n"
-    	                "<a href=\"/3\" class=\"w3-button w3-red w3-round-large\">Led 3</a>\n"
+;
+
+const String main_form_button(int i, bool state)
+{
+    String n(i);
+    String c(state ? "green" : "gray");
+
+    return String("<a href=\"/") + n + String("\" class=\"w3-button w3-") + c + String(" w3-round-large\">Led ") + n + String("</a>\n");
+}
+
+const char *main_form_postamble = "<!DOCTYPE html>\n"
                     "</div>\n"
                     "<br>\n"
   	                "<div class=\"bar\">\n"

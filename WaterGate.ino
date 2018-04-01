@@ -11,15 +11,22 @@ ESP8266WebServer server(80);
 
 const int ESP_LED = 2;
 const int STATUS_LED = 14;
-const int OUTPUT0 = 12;
-const int OUTPUT1 = 13;
-const int OUTPUT2 = 4;
-const int OUTPUT3 = 5;
+const int OUTPUT3 = 12;
+const int OUTPUT2 = 13;
+const int OUTPUT1 = 4;
+const int OUTPUT0 = 5;
 
 void handleRoot()
 {
+    String buf = String(main_form_preamble)
+               + main_form_button(0, digitalRead(OUTPUT0))
+               + main_form_button(1, digitalRead(OUTPUT1))
+               + main_form_button(2, digitalRead(OUTPUT2))
+               + main_form_button(3, digitalRead(OUTPUT3))
+               + String(main_form_postamble);
+
     digitalWrite(STATUS_LED, 1);
-    server.send(200, "text/html", main_form);
+    server.send(200, "text/html", buf);
     digitalWrite(STATUS_LED, 0);
 }
 
@@ -74,22 +81,22 @@ void setup(void){
   
     server.on("/0", [](){
         server.send(200, "text/html", redirect_home);
-        digitalWrite(OUTPUT0, 1);
+        digitalWrite(OUTPUT0, !digitalRead(OUTPUT0));
     });
   
     server.on("/1", [](){
         server.send(200, "text/html", redirect_home);
-        digitalWrite(OUTPUT1, 1);
+        digitalWrite(OUTPUT1, !digitalRead(OUTPUT1));
     });
   
     server.on("/2", [](){
         server.send(200, "text/html", redirect_home);
-        digitalWrite(OUTPUT2, 1);
+        digitalWrite(OUTPUT2, !digitalRead(OUTPUT2));
     });
   
     server.on("/3", [](){
         server.send(200, "text/html", redirect_home);
-        digitalWrite(OUTPUT3, 1);
+        digitalWrite(OUTPUT3, !digitalRead(OUTPUT3));
     });
   
     server.on("/clr", [](){
