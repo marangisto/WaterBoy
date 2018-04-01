@@ -10,11 +10,11 @@ const char* password = "";
 ESP8266WebServer server(80);
 
 const int ESP_LED = 2;
-const int STATUS_LED = 13;
-const int OUTPUT0 = 4;
-const int OUTPUT1 = 5;
-const int OUTPUT2 = 12;
-const int OUTPUT3 = 14;
+const int STATUS_LED = 14;
+const int OUTPUT0 = 12;
+const int OUTPUT1 = 13;
+const int OUTPUT2 = 4;
+const int OUTPUT3 = 5;
 
 void handleRoot()
 {
