@@ -2,14 +2,15 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#include "Content.h"
 
 const char* ssid = "";
 const char* password = "";
 
 ESP8266WebServer server(80);
 
-const int ESP_LED = 13;
-const int STATUS_LED = 2;
+const int ESP_LED = 2;
+const int STATUS_LED = 13;
 const int OUTPUT0 = 4;
 const int OUTPUT1 = 5;
 const int OUTPUT2 = 12;
@@ -17,14 +18,14 @@ const int OUTPUT3 = 14;
 
 void handleRoot()
 {
-    digitalWrite(ESP_LED, 1);
-    server.send(200, "text/plain", "hello from esp8266!");
-    digitalWrite(ESP_LED, 0);
+    digitalWrite(STATUS_LED, 1);
+    server.send(200, "text/html", main_form);
+    digitalWrite(STATUS_LED, 0);
 }
 
 void handleNotFound()
 {
-    digitalWrite(ESP_LED, 1);
+    digitalWrite(STATUS_LED, 1);
     String message = "File Not Found\n\n";
     message += "URI: ";
     message += server.uri();
@@ -36,7 +37,7 @@ void handleNotFound()
     for (uint8_t i=0; i<server.args(); i++)
         message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
     server.send(404, "text/plain", message);
-    digitalWrite(ESP_LED, 0);
+    digitalWrite(STATUS_LED, 0);
 }
 
 void setup(void){
@@ -46,7 +47,6 @@ void setup(void){
     pinMode(OUTPUT1, OUTPUT);
     pinMode(OUTPUT2, OUTPUT);
     pinMode(OUTPUT3, OUTPUT);
-    digitalWrite(ESP_LED, 0);
     Serial.begin(115200);
     WiFi.begin(ssid, password);
     Serial.println("");
@@ -54,7 +54,10 @@ void setup(void){
     // Wait for connection
     while (WiFi.status() != WL_CONNECTED)
     {
-      delay(500);
+      digitalWrite(STATUS_LED, 1);
+      delay(250);
+      digitalWrite(STATUS_LED, 0);
+      delay(250);
       Serial.print(".");
     }
 
@@ -69,32 +72,28 @@ void setup(void){
 
     server.on("/", handleRoot);
   
-    server.on("/inline", [](){
-        server.send(200, "text/plain", "this works as well");
-    });
-  
     server.on("/0", [](){
-        server.send(200, "text/plain", "set led 0");
+        server.send(200, "text/html", redirect_home);
         digitalWrite(OUTPUT0, 1);
     });
   
     server.on("/1", [](){
-        server.send(200, "text/plain", "set led 1");
+        server.send(200, "text/html", redirect_home);
         digitalWrite(OUTPUT1, 1);
     });
   
     server.on("/2", [](){
-        server.send(200, "text/plain", "set led 2");
+        server.send(200, "text/html", redirect_home);
         digitalWrite(OUTPUT2, 1);
     });
   
     server.on("/3", [](){
-        server.send(200, "text/plain", "set led 3");
+        server.send(200, "text/html", redirect_home);
         digitalWrite(OUTPUT3, 1);
     });
   
     server.on("/clr", [](){
-        server.send(200, "text/plain", "clear all leds");
+        server.send(200, "text/html", redirect_home);
         digitalWrite(OUTPUT0, 0);
         digitalWrite(OUTPUT1, 0);
         digitalWrite(OUTPUT2, 0);
@@ -108,6 +107,13 @@ void setup(void){
 
 void loop(void)
 {
+    static uint16_t i = 0;
+
     server.handleClient();
+
+    if (++i == 0)
+        digitalWrite(ESP_LED, 0);
+    else if (i == 1024)
+        digitalWrite(ESP_LED, 1);
 }
 
