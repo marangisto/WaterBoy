@@ -2,6 +2,7 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#include <ArduinoJson.h>
 #include "Content.h"
 
 const char* ssid = "";
@@ -18,6 +19,7 @@ const int OUTPUT0 = 5;
 
 void handleRoot()
 {
+    Serial.println("/");
     String buf = String(main_form_preamble)
                + main_form_button(0, digitalRead(OUTPUT0))
                + main_form_button(1, digitalRead(OUTPUT1))
@@ -44,6 +46,7 @@ void handleNotFound()
     for (uint8_t i=0; i<server.args(); i++)
         message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
     server.send(404, "text/plain", message);
+    Serial.println(message);
     digitalWrite(STATUS_LED, 0);
 }
 
@@ -74,32 +77,41 @@ void setup(void){
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
-    if (MDNS.begin("esp8266"))
+    if (MDNS.begin("watergate"))
         Serial.println("MDNS responder started");
+
+    MDNS.addService("http", "tcp", 80);
+    MDNS.addServiceTxt("http", "tcp", "url", "http://watergate.local");
+    MDNS.addServiceTxt("http", "tcp", "webthing", "true");
 
     server.on("/", handleRoot);
   
     server.on("/0", [](){
+        Serial.println("/0");
         server.send(200, "text/html", redirect_home);
         digitalWrite(OUTPUT0, !digitalRead(OUTPUT0));
     });
   
     server.on("/1", [](){
+        Serial.println("/1");
         server.send(200, "text/html", redirect_home);
         digitalWrite(OUTPUT1, !digitalRead(OUTPUT1));
     });
   
     server.on("/2", [](){
+        Serial.println("/2");
         server.send(200, "text/html", redirect_home);
         digitalWrite(OUTPUT2, !digitalRead(OUTPUT2));
     });
   
     server.on("/3", [](){
+        Serial.println("/3");
         server.send(200, "text/html", redirect_home);
         digitalWrite(OUTPUT3, !digitalRead(OUTPUT3));
     });
   
     server.on("/clr", [](){
+        Serial.println("/clr");
         server.send(200, "text/html", redirect_home);
         digitalWrite(OUTPUT0, 0);
         digitalWrite(OUTPUT1, 0);
