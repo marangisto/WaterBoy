@@ -59,7 +59,7 @@ void ICACHE_RAM_ATTR onTimerISR()
 
     if ((i & 0x3f) == 0)
         digitalWrite(STATUS_LED, true);
-    else if ((i & 0x3f) == 8)
+    else if ((i & 0x3f) == 2)
         digitalWrite(STATUS_LED, false);
 
     ch0::update();
@@ -103,6 +103,26 @@ void handleNotFound()
     digitalWrite(STATUS_LED, 0);
 }
 
+template<typename CHAN>
+static void toggle(const char *url)
+{
+    server.on(url, [url](){
+        Serial.println(url);
+        server.send(200, "text/html", redirect_home);
+        CHAN::write(!CHAN::read());
+    });
+}
+
+template<typename CHAN, bool VAL>
+static void control(const char *url)
+{
+    server.on(url, [url](){
+        Serial.println(url);
+        server.send(200, "text/html", "ok");
+        CHAN::write(VAL);
+    });
+}
+
 void setup(void){
     pinMode(ESP_LED, OUTPUT);
     pinMode(STATUS_LED, OUTPUT);
@@ -144,29 +164,10 @@ void setup(void){
 
     server.on("/", handleRoot);
 
-    server.on("/0", [](){
-        Serial.println("/0");
-        server.send(200, "text/html", redirect_home);
-        ch0::write(!ch0::read());
-    });
-
-    server.on("/1", [](){
-        Serial.println("/1");
-        server.send(200, "text/html", redirect_home);
-        ch1::write(!ch1::read());
-    });
-
-    server.on("/2", [](){
-        Serial.println("/2");
-        server.send(200, "text/html", redirect_home);
-        ch2::write(!ch2::read());
-    });
-
-    server.on("/3", [](){
-        Serial.println("/3");
-        server.send(200, "text/html", redirect_home);
-        ch3::write(!ch3::read());
-    });
+    toggle<ch0>("/0");
+    toggle<ch1>("/1");
+    toggle<ch2>("/2");
+    toggle<ch3>("/3");
 
     server.on("/clr", [](){
         Serial.println("/clr");
@@ -176,6 +177,15 @@ void setup(void){
         ch2::write(false);
         ch3::write(false);
     });
+
+    control<ch0, true>("/0/open");
+    control<ch1, true>("/1/open");
+    control<ch2, true>("/2/open");
+    control<ch3, true>("/3/open");
+    control<ch0, false>("/0/close");
+    control<ch1, false>("/1/close");
+    control<ch2, false>("/2/close");
+    control<ch3, false>("/3/close");
 
     server.onNotFound(handleNotFound);
     server.begin();
